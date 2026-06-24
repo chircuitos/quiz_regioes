@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz das Regiões do Brasil 🗺️</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #2e7d32, #fbc02d, #1976d2);
+    background-size: 400% 400%;
+    animation: bg 12s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  @keyframes bg {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    max-width: 420px;
+    width: 100%;
+    padding: 28px 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.4em;
+    margin: 0 0 4px;
+    color: #1b5e20;
+  }
+  .subtitle {
+    color: #555;
+    margin-bottom: 18px;
+    font-size: 0.95em;
+  }
+  .progress {
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 6px;
+  }
+  .bar-bg {
+    background: #eee;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .bar-fill {
+    background: #43a047;
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  .region-tag {
+    display: inline-block;
+    background: #fff3cd;
+    color: #8a6d00;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.85em;
+    margin-bottom: 14px;
+    font-weight: bold;
+  }
+  .question {
+    font-size: 1.15em;
+    margin-bottom: 20px;
+    color: #222;
+    min-height: 60px;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option {
+    background: #f5f5f5;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .option:hover {
+    border-color: #1976d2;
+    background: #e3f2fd;
+  }
+  .option.correct {
+    background: #c8e6c9;
+    border-color: #43a047;
+  }
+  .option.wrong {
+    background: #ffcdd2;
+    border-color: #e53935;
+  }
+  .option.disabled {
+    pointer-events: none;
+  }
+  .next-btn {
+    margin-top: 20px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1em;
+    cursor: pointer;
+    display: none;
+    width: 100%;
+  }
+  .next-btn.show { display: inline-block; }
+  .result {
+    display: none;
+  }
+  .result.show { display: block; }
+  .quiz-area.hide { display: none; }
+  .trophy {
+    font-size: 3em;
+    margin-bottom: 6px;
+  }
+  .score-text {
+    font-size: 1.3em;
+    color: #1b5e20;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  .restart-btn {
+    margin-top: 16px;
+    background: #43a047;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1em;
+    cursor: pointer;
+    width: 100%;
+  }
+  .feedback {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #444;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🗺️ Quiz das Regiões do Brasil 🗺️</h1>
+  <div class="subtitle">20 perguntas fáceis, 4 de cada região!</div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="progress" id="progress">Pergunta 1 de 20</div>
+    <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+    <div class="region-tag" id="regionTag">Região</div>
+    <div class="question" id="questionText">Pergunta</div>
+    <div class="options" id="optionsArea"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn">Próxima ➡️</button>
+  </div>
+
+  <div class="result" id="resultArea">
+    <div class="trophy">🏆</div>
+    <div>Parabéns!</div>
+    <div class="score-text" id="scoreText"></div>
+    <button class="restart-btn" id="restartBtn">🔄 Jogar de novo!</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // NORTE
+  {
+    region: "🌳 Região Norte",
+    question: "Qual é o maior rio do Brasil, que dá nome à Região Norte?",
+    options: ["Rio Amazonas", "Rio São Francisco", "Rio Tietê", "Rio Paraná"],
+    correct: 0
+  },
+  {
+    region: "🌳 Região Norte",
+    question: "Qual floresta cobre a maior parte da Região Norte?",
+    options: ["Mata Atlântica", "Caatinga", "Floresta Amazônica", "Cerrado"],
+    correct: 2
+  },
+  {
+    region: "🌳 Região Norte",
+    question: "Qual destes é um estado da Região Norte?",
+    options: ["Pará", "Bahia", "Paraná", "Goiás"],
+    correct: 0
+  },
+  {
+    region: "🌳 Região Norte",
+    question: "Qual cidade é a capital do Amazonas, na Região Norte?",
+    options: ["Belém", "Manaus", "Porto Velho", "Macapá"],
+    correct: 1
+  },
+  // NORDESTE
+  {
+    region: "☀️ Região Nordeste",
+    question: "Qual é o tipo de vegetação seca e cheia de cactos, comum no interior do Nordeste?",
+    options: ["Caatinga", "Pantanal", "Pampa", "Mangue"],
+    correct: 0
+  },
+  {
+    region: "☀️ Região Nordeste",
+    question: "Qual destas cidades é a capital da Bahia, no Nordeste?",
+    options: ["Recife", "Salvador", "Fortaleza", "Natal"],
+    correct: 1
+  },
+  {
+    region: "☀️ Região Nordeste",
+    question: "Qual destes é um estado da Região Nordeste?",
+    options: ["Sergipe", "Mato Grosso", "Acre", "Santa Catarina"],
+    correct: 0
+  },
+  {
+    region: "☀️ Região Nordeste",
+    question: "Qual oceano banha o litoral da Região Nordeste?",
+    options: ["Oceano Pacífico", "Oceano Atlântico", "Oceano Índico", "Mar Mediterrâneo"],
+    correct: 1
+  },
+  // CENTRO-OESTE
+  {
+    region: "🌾 Região Centro-Oeste",
+    question: "Qual é a capital do Brasil, localizada na Região Centro-Oeste?",
+    options: ["Goiânia", "Campo Grande", "Brasília", "Cuiabá"],
+    correct: 2
+  },
+  {
+    region: "🌾 Região Centro-Oeste",
+    question: "Qual é o nome da grande área de pântanos e rica em animais, no Centro-Oeste?",
+    options: ["Pantanal", "Amazônia", "Sertão", "Litoral"],
+    correct: 0
+  },
+  {
+    region: "🌾 Região Centro-Oeste",
+    question: "Qual destes é um estado da Região Centro-Oeste?",
+    options: ["Mato Grosso do Sul", "Pernambuco", "Rio Grande do Norte", "Tocantins"],
+    correct: 0
+  },
+  {
+    region: "🌾 Região Centro-Oeste",
+    question: "Qual é o tipo de vegetação com árvores baixas e tortas, comum no Centro-Oeste?",
+    options: ["Cerrado", "Floresta Amazônica", "Mata Atlântica", "Pampa"],
+    correct: 0
+  },
+  // SUDESTE
+  {
+    region: "🏙️ Região Sudeste",
+    question: "Qual é o estado mais populoso do Brasil, na Região Sudeste?",
+    options: ["Rio de Janeiro", "Minas Gerais", "São Paulo", "Espírito Santo"],
+    correct: 2
+  },
+  {
+    region: "🏙️ Região Sudeste",
+    question: "Qual cidade é famosa pelo Cristo Redentor, no Sudeste?",
+    options: ["São Paulo", "Belo Horizonte", "Vitória", "Rio de Janeiro"],
+    correct: 3
+  },
+  {
+    region: "🏙️ Região Sudeste",
+    question: "Qual destes é um estado da Região Sudeste?",
+    options: ["Minas Gerais", "Bahia", "Paraná", "Amazonas"],
+    correct: 0
+  },
+  {
+    region: "🏙️ Região Sudeste",
+    question: "A Região Sudeste é conhecida por ser a mais desenvolvida em qual área?",
+    options: ["Agricultura de subsistência", "Indústria e economia", "Extrativismo vegetal", "Pesca artesanal"],
+    correct: 1
+  },
+  // SUL
+  {
+    region: "🧊 Região Sul",
+    question: "Qual é o estado mais ao sul do Brasil?",
+    options: ["Paraná", "Santa Catarina", "Rio Grande do Sul", "São Paulo"],
+    correct: 2
+  },
+  {
+    region: "🧊 Região Sul",
+    question: "A Região Sul é conhecida por ter clima mais frio e até... o quê, no inverno?",
+    options: ["Neve em algumas áreas", "Calor intenso o ano todo", "Chuvas de verão apenas", "Deserto"],
+    correct: 0
+  },
+  {
+    region: "🧊 Região Sul",
+    question: "Qual destes é um estado da Região Sul?",
+    options: ["Santa Catarina", "Ceará", "Piauí", "Roraima"],
+    correct: 0
+  },
+  {
+    region: "🧊 Região Sul",
+    question: "Qual famosa cachoeira fica na fronteira entre Brasil e Argentina, na Região Sul?",
+    options: ["Cataratas do Iguaçu", "Cachoeira do Caracol", "Cachoeira da Fumaça", "Salto Ventoso"],
+    correct: 0
+  }
+];
+
+let current = 0;
+let score = 0;
+
+const progress = document.getElementById('progress');
+const barFill = document.getElementById('barFill');
+const regionTag = document.getElementById('regionTag');
+const questionText = document.getElementById('questionText');
+const optionsArea = document.getElementById('optionsArea');
+const feedback = document.getElementById('feedback');
+const nextBtn = document.getElementById('nextBtn');
+const quizArea = document.getElementById('quizArea');
+const resultArea = document.getElementById('resultArea');
+const scoreText = document.getElementById('scoreText');
+const restartBtn = document.getElementById('restartBtn');
+
+function loadQuestion() {
+  const q = questions[current];
+  progress.textContent = `Pergunta ${current + 1} de ${questions.length}`;
+  barFill.style.width = `${(current / questions.length) * 100}%`;
+  regionTag.textContent = q.region;
+  questionText.textContent = q.question;
+  optionsArea.innerHTML = '';
+  feedback.textContent = '';
+  nextBtn.classList.remove('show');
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i, btn);
+    optionsArea.appendChild(btn);
+  });
+}
+
+function selectAnswer(i, btn) {
+  const q = questions[current];
+  const allOptions = optionsArea.querySelectorAll('.option');
+  allOptions.forEach(o => o.classList.add('disabled'));
+
+  if (i === q.correct) {
+    btn.classList.add('correct');
+    feedback.textContent = '✅ Acertou!';
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    allOptions[q.correct].classList.add('correct');
+    feedback.textContent = '❌ Quase! A resposta certa está em verde.';
+  }
+  nextBtn.classList.add('show');
+}
+
+nextBtn.onclick = () => {
+  current++;
+  if (current < questions.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+};
+
+function showResult() {
+  quizArea.classList.add('hide');
+  resultArea.classList.add('show');
+  scoreText.textContent = `Você acertou ${score} de ${questions.length} perguntas!`;
+}
+
+restartBtn.onclick = () => {
+  current = 0;
+  score = 0;
+  quizArea.classList.remove('hide');
+  resultArea.classList.remove('show');
+  loadQuestion();
+};
+
+loadQuestion();
+</script>
+
+</body>
+</html>
